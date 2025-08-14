@@ -23,27 +23,25 @@ async function deploy() {
 
     const Contract = await ethers.getContractFactory(CONTRACT_NAME);
 
+    const tokenName = `Test Token ${TOKEN_NUMBER}`;
+    const tokenSymbol = `TT${TOKEN_NUMBER}`;
+    const contract = await Contract.connect(deployer).deploy(tokenName, tokenSymbol);
+    const deployTransaction = (await contract.deployed()).deployTransaction.wait();
 
+    console.log(`Contract: \`${CONTRACT_NAME}\` is deployed to \`${contract.address}\`|\`${hre.network.name}\`.`);
+    const saveAddress = getAddressSaver(PATH_TO_FILE, network.name, true);
+    saveAddress(
+        `${CONTRACT_NAME}_${TOKEN_NUMBER}`,
+        {
+            address: contract.address,
+            deployedBlock: (await deployTransaction).blockNumber,
+            chainId: ethers.provider.network.chainId
+        },
+        false
+    );
 
-        const tokenName = `Test Token ${TOKEN_NUMBER}`;
-        const tokenSymbol = `TT${TOKEN_NUMBER}`;
-        const contract = await Contract.connect(deployer).deploy(tokenName, tokenSymbol);
-        const deployTransaction = (await contract.deployed()).deployTransaction.wait();
-
-        console.log(`Contract: \`${CONTRACT_NAME}\` is deployed to \`${contract.address}\`|\`${hre.network.name}\`.`);
-        const saveAddress = getAddressSaver(PATH_TO_FILE, network.name, true);
-        saveAddress(
-            `${CONTRACT_NAME}_${TOKEN_NUMBER}`,
-            {
-                address: contract.address,
-                deployedBlock: (await deployTransaction).blockNumber,
-                chainId: ethers.provider.network.chainId
-            },
-            false
-        );
-
-        console.log(`\nDeployment the ${tokenName} is completed.`);
-        await verify(contract.address, [tokenName, tokenSymbol]);
+    console.log(`\nDeployment the ${tokenName} is completed.`);
+    await verify(contract.address, [tokenName, tokenSymbol]);
 
     console.log("\nDone.");
 }

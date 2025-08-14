@@ -2,14 +2,11 @@ import {
     loadFixture,
     ethers,
     expect,
-    parseEther,
     parseUnits,
-    formatUnits,
     Zero,
     AddressZero,
     BigNumber,
     MaxUint256,
-    logger,
     HashZero,
     SignerWithAddress,
     time
@@ -29,15 +26,8 @@ import {
     Router,
     Router__factory,
     TestToken,
-    TestToken__factory,
-    ERC20__factory,
-    ReentrancyGuardTransient__factory,
-    IProtocolFeeController__factory,
-    Math__factory,
-    IVaultMain__factory
+    TestToken__factory
 } from "../../typechain-types";
-import * as typechainTypes from "../../typechain-types";
-import { all } from "axios";
 
 enum TOKEN_TYPE {
     STANDARD = 0,
@@ -168,7 +158,7 @@ async function preSetupTestEnvironment() {
     const routerContract: Router = await routerFactory.deploy(
         vaultContract.address,
         AddressZero, // WETH address
-        '{"name":"Router""version":2"deployment":"2025-v3-router-v2"}'
+        "{\"name\":\"Router\"\"version\":2\"deployment\":\"2025-v3-router-v2\"}"
     );
     await routerContract.deployed();
 
@@ -250,38 +240,7 @@ async function setupWithProportionalInit() {
     );
     await initializeTx.wait();
 
-    expect(initializeTx).to.emit(vaultExtensionContract, "LiquidityAdded");
-
-    return {
-        ...preSetup
-    };
-}
-async function setupWithUnbalancedInit() {
-    type PreSetupReturnType = Awaited<ReturnType<typeof preSetupTestEnvironment>>;
-    const preSetup: PreSetupReturnType = await loadFixture(preSetupTestEnvironment);
-    const { deployer, stablePoolContract, routerContract, vaultExtensionContract, sortedTokenAddresses } = preSetup;
-
-    const amount = parseUnits("100", 18);
-    const initializeAmounts = sortedTokenAddresses.map((_, index) => amount.mul(index + 1));
-    const minBptAmountOut = parseUnits("5", 18);
-
-    // Allocate tokens to the deployer and approve them for the router
-    sortedTokenAddresses.forEach(async (tokenAddress, index) => {
-        await allocateTokenTo(tokenAddress, deployer, initializeAmounts[index]);
-        await approveToken(tokenAddress, deployer, routerContract.address, initializeAmounts[index]);
-    });
-    // Initialize the stable pool with unbalanced liquidity
-    const initializeTx = await routerContract.connect(deployer).initialize(
-        stablePoolContract.address,
-        sortedTokenAddresses,
-        initializeAmounts,
-        minBptAmountOut,
-        false, // weth is eth
-        HashZero // No additional user data
-    );
-    await initializeTx.wait();
-
-    expect(initializeTx).to.emit(vaultExtensionContract, "LiquidityAdded");
+    await expect(initializeTx).to.emit(vaultExtensionContract, "LiquidityAdded");
 
     return {
         ...preSetup

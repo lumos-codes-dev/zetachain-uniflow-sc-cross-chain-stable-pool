@@ -167,25 +167,6 @@ interface IVaultMain {
     function transferFrom(address spender, address from, address to, uint256 amount) external returns (bool success);
 
     /*******************************************************************************
-                                  ERC4626 Buffers
-    *******************************************************************************/
-
-    /**
-     * @notice Wraps/unwraps tokens based on the parameters provided.
-     * @dev All parameters are given in raw token decimal encoding. It requires the buffer to be initialized,
-     * and uses the internal wrapped token buffer when it has enough liquidity to avoid external calls.
-     *
-     * @param params Parameters for the wrap/unwrap operation (see struct definition)
-     * @return amountCalculatedRaw Calculated swap amount
-     * @return amountInRaw Amount of input tokens for the swap
-     * @return amountOutRaw Amount of output tokens from the swap
-     */
-    // @todo deletes
-    // function erc4626BufferWrapOrUnwrap(
-    //     BufferWrapOrUnwrapParams memory params
-    // ) external returns (uint256 amountCalculatedRaw, uint256 amountInRaw, uint256 amountOutRaw);
-
-    /*******************************************************************************
                                      Miscellaneous
     *******************************************************************************/
 

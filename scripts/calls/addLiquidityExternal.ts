@@ -1,16 +1,18 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import * as dotenv from "dotenv";
 dotenv.config();
 import nodeConfig from "config";
 
 import hre from "hardhat";
-const { ethers, network } = hre;
+const { ethers } = hre;
 
-const { parseEther, parseUnits, formatEther, formatUnits, solidityPack } = ethers.utils;
+const { parseEther, parseUnits, formatEther, formatUnits } = ethers.utils;
 const { Zero, AddressZero, HashZero } = ethers.constants;
 
-import { HelperContract__factory } from "../../typechain-types";
-import { GatewayEVM, GatewayEVM__factory, ZRC20__factory } from "../../test/helpers/types/contracts";
-import { MaxUint256 } from "../../test/helpers";
+import { GatewayEVM__factory, ZRC20__factory } from "../../test/helpers/types/contracts";
 
 /// ------- External Add Liquidity Script -------
 // NOTE: Run this script with the command:
@@ -22,13 +24,13 @@ const ROUTER_ADDRESS = "0xB4a9584e508E1dB7ebb8114573D39A69189CE1Ca";
 
 const POOL_ADDRESSES: { [key: string]: string } = {
     uETH: "0x8c8b1538e753C053d96716e5063a6aD54A3dBa47",
-    // uUSDC: "0x21B9f66E532eb8A2Fa5Bf6623aaa94857d77f1Cb" // old
     uUSDC: "0xCe83BFd5171237aF064A4C6203Ff3902D44fd4BD"
 };
+
 // NOTE: If you want to transfer native tokens, you should set the `TRANSFER_ERC20` variable to `false`.
 const TRANSFER_ERC20 = true;
 // NOTE: Set the amount of tokens to transfer without decimals.
-const AMOUNT = "30";
+const AMOUNT = "1";
 
 async function main() {
     const [caller] = await ethers.getSigners();

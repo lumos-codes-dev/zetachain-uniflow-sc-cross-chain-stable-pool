@@ -152,7 +152,7 @@ async function deploy() {
     }
 
     console.log(
-        `\nDeployment is completed:\n` // +
+        "\nDeployment is completed:\n" // +
         // `- ${CONTRACT_NAMES[0]}: ${vaultAdminContract.address}|\n` +
         // `- ${CONTRACT_NAMES[1]}: ${vaultExtensionContract.address}|\n` +
         // `- ${CONTRACT_NAMES[2]}: ${protocolFeeControllerContract.address}|\n` +
@@ -165,7 +165,7 @@ async function deploy() {
         await verify(contractAddresses[i], [...contractArgs[i]]);
     }
 
-    console.log(`Done. All contracts are deployed.`);
+    console.log("Done. All contracts are deployed.");
 }
 
 deploy().catch((error) => {

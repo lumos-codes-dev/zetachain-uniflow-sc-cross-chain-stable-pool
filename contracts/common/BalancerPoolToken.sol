@@ -3,7 +3,7 @@
 pragma solidity ^0.8.24;
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-// @todo delete
+// @todo revert support of permit2
 // import { IERC20Permit } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -23,7 +23,7 @@ import {VaultGuard} from "./VaultGuard.sol";
  * @dev Implementation of the ERC-20 Permit extension allowing approvals to be made via signatures, as defined in
  * https://eips.ethereum.org/EIPS/eip-2612[ERC-2612].
  */
-// @todo delete
+// @todo revert support of permit2
 // contract BalancerPoolToken is IERC20, IERC20Metadata, IERC20Permit, IRateProvider, EIP712, Nonces, ERC165, VaultGuard {
 contract BalancerPoolToken is IERC20, IERC20Metadata, IRateProvider, EIP712, Nonces, ERC165, VaultGuard {
     bytes32 public constant PERMIT_TYPEHASH =
@@ -153,10 +153,11 @@ contract BalancerPoolToken is IERC20, IERC20Metadata, IRateProvider, EIP712, Non
         _vault.approve(owner, spender, amount);
     }
 
+    // @todo revert support of permit2
     // // @inheritdoc IERC20Permit
     // function nonces(address owner) public view virtual override(IERC20Permit, Nonces) returns (uint256) {
     //     return super.nonces(owner);
-    // } // @todo delete
+    // }
 
     /// @notice Increment the sender's nonce to revoke any currently granted (but not yet executed) `permit`.
     function incrementNonce() external {

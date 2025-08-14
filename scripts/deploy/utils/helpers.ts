@@ -14,7 +14,6 @@ interface Addresses {
 }
 
 import hre from "hardhat";
-import { string } from "hardhat/internal/core/params/argumentTypes";
 const { ethers } = hre;
 
 function sleep(ms: number) {
@@ -60,6 +59,7 @@ function getAddressSaver(path: string, network: string, isLog: boolean) {
             addresses[network].old = addresses[network].new;
             addresses[network].new = {};
         }
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         addresses[network].new![contractName] = contractData;
         if (isLog) {
             if (typeof contractData === "string") {

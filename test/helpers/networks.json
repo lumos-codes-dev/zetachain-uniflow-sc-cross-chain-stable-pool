@@ -248,14 +248,7 @@
     },
     "base_mainnet": {
         "chain_id": 8453,
-        "chain_aliases": [
-            "base",
-            "base_network",
-            "base_chain",
-            "base-network",
-            "base-chain",
-            "base-mainnet"
-        ],
+        "chain_aliases": ["base", "base_network", "base_chain", "base-network", "base-chain", "base-mainnet"],
         "chain_name": "Base Mainnet",
         "fees": {
             "assets": [
@@ -505,10 +498,7 @@
     "btc_testnet": {
         "chain_id": 18332,
         "chain_name": "Bitcoin Testnet",
-        "chain_aliases": [
-            "tbtc",
-            "btc-testnet"
-        ],
+        "chain_aliases": ["tbtc", "btc-testnet"],
         "assets": [
             {
                 "denoms": [
@@ -539,10 +529,7 @@
     "btc_mainnet": {
         "chain_id": 8332,
         "chain_name": "Bitcoin",
-        "chain_aliases": [
-            "btc",
-            "bitcoin"
-        ],
+        "chain_aliases": ["btc", "bitcoin"],
         "assets": [
             {
                 "denoms": [
@@ -1055,12 +1042,7 @@
     },
     "solana_devnet": {
         "chain_id": 901,
-        "chain_aliases": [
-            "solana_testnet",
-            "solana_devnet",
-            "solana-testnet",
-            "solana-devnet"
-        ],
+        "chain_aliases": ["solana_testnet", "solana_devnet", "solana-testnet", "solana-devnet"],
         "chain_name": "Solana Devnet",
         "assets": [
             {

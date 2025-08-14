@@ -225,7 +225,7 @@ const config: HardhatUserConfig = {
             chainId: 80002,
             url: "https://rpc-amoy.polygon.technology",
             accounts: [...MAINNET_KEYS]
-        },
+        }
     },
     contractSizer: {
         except: ["mocks/", "from-dependencies/"]

@@ -13,7 +13,12 @@ contract MockERC20 is ERC20 {
      * @param initialSupply Initial total supply to mint to the `owner` address
      * @param owner The address that will receive the entire initial supply
      */
-    constructor(string memory name_, string memory symbol_, uint256 initialSupply, address owner) ERC20(name_, symbol_) {
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint256 initialSupply,
+        address owner
+    ) ERC20(name_, symbol_) {
         require(owner != address(0), "Invalid owner address");
         _mint(owner, initialSupply);
     }

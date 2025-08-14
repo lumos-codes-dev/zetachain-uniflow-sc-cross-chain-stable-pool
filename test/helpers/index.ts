@@ -23,7 +23,8 @@ if (!process.env.npm_config_debug_log) {
 const { Zero, One, AddressZero, HashZero, MaxUint256 } = ethers.constants;
 const { parseEther, parseUnits, formatEther, formatUnits, solidityPack } = ethers.utils;
 
-export const logger = (...args: any[]) => process.env.npm_config_debug_log === "true" && console.log("[DEBUG]", ...args);
+export const logger = (...args: any[]) =>
+    process.env.npm_config_debug_log === "true" && console.log("[DEBUG]", ...args);
 
 export async function findSlotForVariable(contractName: string, variableName: string): Promise<BigNumber | undefined> {
     const artifact = await hre.artifacts.readArtifact(contractName);
@@ -51,7 +52,7 @@ export async function getStorage(
     provider?: providers.JsonRpcProvider
 ): Promise<string> {
     if (!provider) {
-        provider = hre.ethers.provider as providers.JsonRpcProvider;
+        provider = hre.ethers.provider;
     }
 
     const value = await provider.getStorageAt(contractAddress, slot);

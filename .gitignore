@@ -1,12 +1,6 @@
 # Hardhat files.
 cache
-artifacts/@*/
-artifacts/hardhat/
-artifacts/contracts/mocks/
-artifacts/contracts/common/
-artifacts/contracts/libs/
-artifacts/contracts/interfaces/
-artifacts/contracts/*/*.dbg.json
+artifacts/*
 
 # Artifacts that TypeChain creates.
 typechain
@@ -54,14 +48,10 @@ gas-report.txt
 bin
 
 # Docs
-docs/_*/
-docs/test/
-docs/mocks/
-docs/errors/
-docs/interfaces/
+docs/*
 
 # ABI
-/abi/@*/
+abi/*
 
 # External contracts types for tests
 test/helpers/types/

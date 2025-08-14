@@ -7,7 +7,7 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-// @todo delete or implement
+// @todo revert support of permit2
 // import { IPermit2 } from "@uniswap/permit2/src/interfaces/IPermit2.sol";
 import {IRouterCommon} from "../interfaces/IRouterCommon.sol";
 import {IWETH} from "../interfaces/IWETH.sol";
@@ -48,7 +48,7 @@ abstract contract RouterCommon is IRouterCommon, SenderGuard, VaultGuard, Reentr
     // solhint-disable-next-line var-name-mixedcase
     IWETH internal immutable _weth;
 
-    // @todo delete
+    // @todo revert support of permit2
     // IPermit2 internal immutable _permit2;
 
     /**
@@ -77,12 +77,12 @@ abstract contract RouterCommon is IRouterCommon, SenderGuard, VaultGuard, Reentr
     constructor(
         IVault vault,
         IWETH weth,
-        // @todo delete
+        // @todo revert support of permit2
         // IPermit2 permit2,
         string memory routerVersion
     ) SenderGuard() VaultGuard(vault) Version(routerVersion) {
         _weth = weth;
-        // @todo delete
+        // @todo revert support of permit2
         //_permit2 = permit2;
     }
 
@@ -92,10 +92,10 @@ abstract contract RouterCommon is IRouterCommon, SenderGuard, VaultGuard, Reentr
     }
 
     /// @inheritdoc IRouterCommon
-    // @todo delete
+    // @todo revert support of permit2
     // function getPermit2() external view returns (IPermit2) {
     function getPermit2() external view returns (address) {
-        // @todo delete
+        // @todo revert support of permit2
         // return _permit2;
         return address(0);
     }
@@ -176,7 +176,7 @@ abstract contract RouterCommon is IRouterCommon, SenderGuard, VaultGuard, Reentr
             // and trusted contracts.
             //
             // See https://www.immunebytes.com/blog/permit2-erc-20-token-approvals-and-associated-risks/.
-            // @todo delete
+            // @todo revert support of permit2
             // _permit2.permit(msg.sender, permit2Batch, permit2Signature);
         }
     }
@@ -259,7 +259,7 @@ abstract contract RouterCommon is IRouterCommon, SenderGuard, VaultGuard, Reentr
         } else {
             if (amountIn > 0) {
                 // Send the tokenIn amount to the Vault.
-                // @todo delete
+                // @todo revert support of permit2
                 // _permit2.transferFrom(sender, address(_vault), amountIn.toUint160(), address(tokenIn));
                 IERC20(tokenIn).transferFrom(sender, address(_vault), amountIn.toUint160());
                 _vault.settle(tokenIn, amountIn);

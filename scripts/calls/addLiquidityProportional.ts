@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import * as dotenv from "dotenv";
 dotenv.config();
 
 import hre from "hardhat";
 const { ethers } = hre;
 import { VoidSigner } from "ethers";
-const { parseEther, parseUnits, formatEther, formatUnits, solidityPack } = ethers.utils;
-const { BigNumber } = ethers;
-const { Zero, AddressZero, HashZero } = ethers.constants;
+const { parseUnits, formatUnits } = ethers.utils;
+const { AddressZero, HashZero } = ethers.constants;
 
-import { Router, Router__factory, StablePool__factory, StablePool } from "../../typechain-types";
+import { Router__factory, StablePool__factory } from "../../typechain-types";
 import { ZRC20__factory, ZRC20 } from "../../test/helpers/types/contracts";
 
 import { MaxUint256 } from "@uniswap/permit2-sdk";
@@ -38,9 +41,9 @@ async function main() {
     const zero = new VoidSigner(AddressZero, provider);
 
     // Connect to the CompositeLiquidityRouter contract
-    const routerContract = Router__factory.connect(ROUTER_ADDRESS, provider) as Router;
+    const routerContract = Router__factory.connect(ROUTER_ADDRESS, provider);
     // Connect to the StablePool contract
-    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], provider) as StablePool;
+    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], provider);
     const poolDecimal = await poolContract.decimals();
     const poolSymbol = await poolContract.symbol();
     // Get the token addresses from the pool

@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.24;
 
-import { Bytes32AddressLib } from "./Bytes32AddressLib.sol";
+import {Bytes32AddressLib} from "./Bytes32AddressLib.sol";
 
 /**
  * @notice Deploy to deterministic addresses without an initcode factor.
@@ -53,7 +53,7 @@ library CREATE3 {
         require(proxy != address(0), "DEPLOYMENT_FAILED");
 
         deployed = getDeployed(salt);
-        (bool success, ) = proxy.call{ value: value }(creationCode);
+        (bool success, ) = proxy.call{value: value}(creationCode);
         require(success && deployed.code.length != 0, "INITIALIZATION_FAILED");
     }
 

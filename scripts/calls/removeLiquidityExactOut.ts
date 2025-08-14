@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -5,11 +6,10 @@ import hre from "hardhat";
 const { ethers } = hre;
 
 import { VoidSigner } from "ethers";
-const { parseEther, parseUnits, formatEther, formatUnits, solidityPack } = ethers.utils;
-const { Zero, AddressZero, HashZero } = ethers.constants;
+const { parseUnits, formatUnits } = ethers.utils;
+const { AddressZero, HashZero } = ethers.constants;
 
-import { Router, Router__factory, StablePool__factory, StablePool } from "../../typechain-types";
-import { ZRC20__factory, ZRC20 } from "../../test/helpers/types/contracts";
+import { Router__factory, StablePool__factory } from "../../typechain-types";
 import { MaxUint256 } from "../../test/helpers";
 
 const ROUTER_ADDRESS = "0xB4a9584e508E1dB7ebb8114573D39A69189CE1Ca"; // << new address
@@ -19,19 +19,11 @@ const POOL_ADDRESSES: { [key: string]: string } = {
     uUSDC: "0x21B9f66E532eb8A2Fa5Bf6623aaa94857d77f1Cb"
 };
 
-
-
 // NOTE: Change this to the pool you want to add liquidity to
 const CURRENT_POOL = "uETH";
 // NOTE: Set the exact BPT amount to receive for add proportional liquidity
 const EXACT_BPT_AMOUNT_IN = "0.01";
-const EXACT_BPT_AMOUNT_OUT = "0.06";
-const MAX_BPT_AMOUNT_IN = "1";
-
-// NOTE: Set the chain ID for the deposit network
-// const CHAIN_ID = 421614; // << Arbitrum Sepolia Chain ID
-const CHAIN_ID = 84532; // << Base Sepolia Chain ID
-// const CHAIN_ID = 11155111; // << Sepolia Chain ID
+const EXACT_BPT_AMOUNT_OUT = "0.05";
 
 async function main() {
     const [caller] = await ethers.getSigners();
@@ -41,9 +33,9 @@ async function main() {
     const zero = new VoidSigner(AddressZero, ethers.provider);
 
     // Connect to the CompositeLiquidityRouter contract
-    const routerContract = Router__factory.connect(ROUTER_ADDRESS, provider) as Router;
+    const routerContract = Router__factory.connect(ROUTER_ADDRESS, provider);
     // Connect to the StablePool contract
-    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], caller) as StablePool;
+    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], caller);
     const poolDecimal = await poolContract.decimals();
     const poolSymbol = await poolContract.symbol();
     // Get the token addresses from the pool
@@ -58,7 +50,6 @@ async function main() {
     console.log("* ", poolContract.address, "- Pool address");
     console.log("* ", currentNetwork, "- Network name");
     console.log("\n --- ------- ---- --- ");
-
 
     const queryExactOutTx = await routerContract
         .connect(zero)
@@ -87,41 +78,8 @@ async function main() {
         return;
     }
 
-    // console.log(
-    //     `\nUser balance of ${poolSymbol} before remove liquidity: ${formatUnits(balanceLPBefore, poolDecimal)}`
-    // );
-
-    // const minAmountOut = "1";
-    // // Create the remove liquidity transaction: unbalanced
-    // const removeLiquidityUnbalancedTx = await routerContract[
-    //     "removeLiquiditySingleTokenExactIn(address,uint256,uint256,uint256,bool,bytes)"
-    // ](
-    //     POOL_ADDRESSES[CURRENT_POOL],
-    //     parseUnits(EXACT_BPT_AMOUNT_IN, poolDecimal),
-    //     CHAIN_ID, // << Chain ID for the deposit network
-    //     minAmountOut,
-    //     false, // << weth is eth
-    //     HashZero, // << No additional user data
-    //     {
-    //         gasLimit: 5000000 // << Gas limit for the transaction
-    //     }
-    // );
-    // const removeLiquidityUnbalancedTx = await routerContract[
-    //     "removeLiquiditySingleTokenExactIn(address,uint256,address,uint256,bool,bytes)"
-    // ](
-    //     POOL_ADDRESSES[CURRENT_POOL],
-    //     parseUnits(EXACT_BPT_AMOUNT_IN, poolDecimal),
-    //     tokenAddresses[2], // << Chain ID for the deposit network
-    //     minAmountOut,
-    //     false, // << weth is eth
-    //     HashZero, // << No additional user data
-    //     {
-    //         gasLimit: 5000000 // << Gas limit for the transaction
-    //     }
-    // );
     const removeLiquidityUnbalancedTx = await routerContract.connect(caller).removeLiquiditySingleTokenExactOut(
         POOL_ADDRESSES[CURRENT_POOL],
-        // parseUnits(MAX_BPT_AMOUNT_IN, poolDecimal),
         queryExactOutTx,
         tokenAddresses[0],
         parseUnits(EXACT_BPT_AMOUNT_OUT, 18),
@@ -131,22 +89,9 @@ async function main() {
             gasLimit: 5000000 // << Gas limit for the transaction
         }
     );
-    // const removeLiquidityUnbalancedTx = await routerContract.removeLiquidityProportional(
-    //     POOL_ADDRESSES[CURRENT_POOL],
-    //     parseUnits(EXACT_BPT_AMOUNT_IN, poolDecimal),
-    //     tokenAddresses.map(() => minAmountOut),
-    //     false, // << weth is eth
-    //     HashZero, // << No additional user data
-    //     {
-    //         gasLimit: 5000000 // << Gas limit for the transaction
-    //     }
-    // );
 
     await removeLiquidityUnbalancedTx.wait();
     console.log(`\n✅ Remove unbalanced liquidity transaction hash: ${removeLiquidityUnbalancedTx.hash}\n`);
-
-    // const balanceLPAfters = await poolContract.balanceOf(caller.address);
-    // console.log(`\nUser balance of ${poolSymbol} after remove liquidity: ${formatUnits(balanceLPAfters, poolDecimal)}`);
 }
 
 main().catch((error) => {

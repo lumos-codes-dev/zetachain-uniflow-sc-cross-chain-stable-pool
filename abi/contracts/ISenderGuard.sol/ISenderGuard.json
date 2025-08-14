@@ -1,5 +1,0 @@
-[
-  "error EthTransfer()",
-  "error SwapDeadline()",
-  "function getSender() view returns (address)"
-]

@@ -517,14 +517,6 @@ contract VaultExtension is IVaultExtension, VaultCommon, Proxy {
             });
     }
 
-    // /// @inheritdoc IVaultExtension
-    // @todo delete
-    // function getHooksConfig(
-    //     address pool
-    // ) external view onlyVaultDelegateCall withRegisteredPool(pool) returns (HooksConfig memory) {
-    //     return _poolConfigBits[pool].toHooksConfig(_hooksContracts[pool]);
-    // }
-
     /// @inheritdoc IVaultExtension
     function getBptRate(
         address pool

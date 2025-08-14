@@ -6,7 +6,7 @@ import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-// @todo revert this in the future
+// @todo revert support of permit2
 // import { IPermit2 } from "@uniswap/permit2/src/interfaces/IPermit2.sol";
 
 import {IWETH} from "./interfaces/IWETH.sol";
@@ -58,6 +58,12 @@ contract Router is IRouter, RouterCommon, UniversalContract {
 
     error VaultNotRegisteredNetwork(address pool, uint256 chainId);
 
+    /// @notice Error thrown when tokenIndex is out of bounds for pool tokens.
+    error InvalidTokenIndex(uint256 tokenIndex, uint256 tokensLength);
+
+    /// @notice Error thrown when trying to add a token with zero amount.
+    error ZeroTokenAmount();
+
     /// @notice Modifier that restricts access to the Gateway contract.
     modifier onlyGateway() {
         if (msg.sender != address(GATEWAY)) revert NotGateway();
@@ -67,11 +73,11 @@ contract Router is IRouter, RouterCommon, UniversalContract {
     constructor(
         IVault vault,
         IWETH weth,
-        // @todo revert this in the future
+        // @todo revert support of permit2
         // IPermit2 permit2,
         string memory routerVersion
     )
-        // @todo revert this in the future
+        // @todo revert support of permit2
         // ) RouterCommon(vault, weth, permit2, routerVersion) {
         RouterCommon(vault, weth, routerVersion)
     {
@@ -120,7 +126,6 @@ contract Router is IRouter, RouterCommon, UniversalContract {
                     kind: AddLiquidityKind.UNBALANCED,
                     // @todo check that it is not needed
                     wethIsEth: false,
-                    // @todo maybe add some data here?
                     userData: "0x"
                 })
             )
@@ -288,7 +293,7 @@ contract Router is IRouter, RouterCommon, UniversalContract {
                 // Transfer tokens from the user to the Vault.
                 // Any value over MAX_UINT128 would revert above in `initialize`, so this SafeCast shouldn't be
                 // necessary. Done out of an abundance of caution.
-                // @todo revert this in the future
+                // @todo revert support of permit2
                 // _permit2.transferFrom(params.sender, address(_vault), amountIn.toUint160(), address(token));
                 IERC20(token).transferFrom(params.sender, address(_vault), amountIn.toUint160());
                 _vault.settle(token, amountIn);
@@ -302,9 +307,6 @@ contract Router is IRouter, RouterCommon, UniversalContract {
     /***************************************************************************
                                    Add Token To Pool
     ***************************************************************************/
-    // @todo implement this function
-    error Todo();
-
     function addTokenToPool(
         address pool,
         TokenConfig memory tokenConfig,
@@ -338,13 +340,13 @@ contract Router is IRouter, RouterCommon, UniversalContract {
             })
         );
 
-        // @todo need to implement revert reason
-        if (params.exactAmountIn == 0) revert Todo();
+        /// @notice Revert if trying to add a token with zero amount
+        if (params.exactAmountIn == 0) revert ZeroTokenAmount();
 
         IERC20[] memory tokens = _vault.getPoolTokens(params.pool);
 
-        // @todo need to implement revert reason
-        if (tokenIndex > tokens.length - 1) revert Todo();
+        /// @notice Revert if tokenIndex is out of bounds for pool tokens
+        if (tokenIndex > tokens.length - 1) revert InvalidTokenIndex(tokenIndex, tokens.length);
 
         IERC20(tokens[tokenIndex]).transferFrom(params.sender, address(_vault), params.exactAmountIn.toUint160());
         _vault.settle(tokens[tokenIndex], params.exactAmountIn);
@@ -544,7 +546,7 @@ contract Router is IRouter, RouterCommon, UniversalContract {
             } else {
                 // Any value over MAX_UINT128 would revert above in `addLiquidity`, so this SafeCast shouldn't be
                 // necessary. Done out of an abundance of caution.
-                // @todo revert this in the future
+                // @todo revert support of permit2
                 // _permit2.transferFrom(params.sender, address(_vault), amountIn.toUint160(), address(token));
                 if (_initOnColl) {
                     IERC20(token).transfer(address(_vault), amountIn.toUint160());

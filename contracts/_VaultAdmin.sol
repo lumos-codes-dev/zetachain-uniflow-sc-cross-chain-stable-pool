@@ -6,8 +6,6 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-// @todo wip
-// import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import {IProtocolFeeController} from "./interfaces/IProtocolFeeController.sol";
 import {IAuthorizer} from "./interfaces/IAuthorizer.sol";
@@ -72,8 +70,6 @@ contract VaultAdmin is IVaultAdmin, VaultCommon, Authentication, VaultGuard {
 
     constructor(
         IVault mainVault,
-        // @todo wip
-        // address protocolMainAdmin,
         uint32 pauseWindowDuration,
         uint32 bufferPeriodDuration,
         uint256 minTradeAmount,
@@ -95,8 +91,6 @@ contract VaultAdmin is IVaultAdmin, VaultCommon, Authentication, VaultGuard {
 
         _MINIMUM_TRADE_AMOUNT = minTradeAmount;
         _MINIMUM_WRAP_AMOUNT = minWrapAmount;
-        // @todo wip
-        // _grantRole(DEFAULT_ADMIN_ROLE, protocolMainAdmin);
     }
 
     /*******************************************************************************

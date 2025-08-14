@@ -160,9 +160,7 @@ contract BaseSplitCodeFactory {
             // mcopy(constructorArgsCodeDataPtr, constructorArgsDataPtr, constructorArgsSize)  - The "mcopy" instruction is only available for Cancun-compatible VMs (you are currently compiling for "london").
             // Copy constructorArgsSize bytes from constructorArgsDataPtr to constructorArgsCodeDataPtr
             let i := 0
-            for {
-
-            } lt(i, constructorArgsSize) {
+            for {} lt(i, constructorArgsSize) {
                 i := add(i, 32)
             } {
                 // Calculate the number of bytes to copy in this iteration (handle last partial word)
