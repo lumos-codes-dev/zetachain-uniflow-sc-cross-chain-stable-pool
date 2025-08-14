@@ -1,3 +1,4 @@
+// Test framework imports
 import {
     loadFixture,
     ethers,
@@ -10,8 +11,9 @@ import {
     HashZero,
     SignerWithAddress,
     time
-} from "../helpers"; // Adjust the path as needed
+} from "../helpers";
 
+// Contract type imports
 import {
     VaultAdmin,
     VaultAdmin__factory,
@@ -29,39 +31,64 @@ import {
     TestToken__factory
 } from "../../typechain-types";
 
+// ================================================================================================
+// CONSTANTS AND TYPES
+// ================================================================================================
+
 enum TOKEN_TYPE {
     STANDARD = 0,
     WITH_RATE = 1
 }
 
-const PAUSE_WINDOW_DURATION = time.duration.days(90); // 90 days in seconds
-const BUFFER_PERIOD_DURATION = time.duration.days(30); // 30 days in seconds
+const PAUSE_WINDOW_DURATION = time.duration.days(90);
+const BUFFER_PERIOD_DURATION = time.duration.days(30);
 const MINIMUM_TRADE_AMOUNT = 1e6;
 const MINIMUM_WRAP_AMOUNT = 1e3;
 const DEFAULT_AMP_FACTOR = 200;
 const SWAP_FEE_PERCENTAGE = 1000000000000;
 
-// Helper function to approve token
-async function approveToken(token: TestToken | string, owner: SignerWithAddress, spender: string, amount: BigNumber) {
+// ================================================================================================
+// HELPER FUNCTIONS
+// ================================================================================================
+
+/**
+ * Approves a token for spending by a spender
+ */
+async function approveToken(
+    token: TestToken | string,
+    owner: SignerWithAddress,
+    spender: string,
+    amount: BigNumber
+): Promise<void> {
     const tokenContract = typeof token === "string" ? TestToken__factory.connect(token, owner) : token;
     const approvalTx = await tokenContract.connect(owner).approve(spender, amount);
     await approvalTx.wait();
     const allowance = await tokenContract.allowance(owner.address, spender);
     expect(allowance).to.be.equal(amount);
 }
-// Helper function to batch approve tokens
+
+/**
+ * Batch approves multiple tokens for spending
+ */
 async function batchApproveTokens(
     tokens: TestToken[] | string[],
     owner: SignerWithAddress,
     spender: string,
     amount: BigNumber
-) {
+): Promise<void> {
     for (const token of tokens) {
         await approveToken(token, owner, spender, amount);
     }
 }
-// Helper function to allocate token
-async function allocateTokenTo(token: TestToken | string, recipient: SignerWithAddress, amount: BigNumber) {
+
+/**
+ * Mints tokens to a recipient
+ */
+async function allocateTokenTo(
+    token: TestToken | string,
+    recipient: SignerWithAddress,
+    amount: BigNumber
+): Promise<void> {
     const tokenContract = typeof token === "string" ? TestToken__factory.connect(token, recipient) : token;
     const balanceBefore = await tokenContract.balanceOf(recipient.address);
     const mintTx = await tokenContract.connect(recipient).mint(amount);
@@ -70,34 +97,46 @@ async function allocateTokenTo(token: TestToken | string, recipient: SignerWithA
     expect(balanceAfter.sub(balanceBefore)).to.be.equal(amount);
 }
 
-// Helper function to batch allocate tokens
-async function batchAllocateTokensTo(tokens: TestToken[] | string[], recipient: SignerWithAddress, amount: BigNumber) {
+/**
+ * Batch mints tokens to a recipient
+ */
+async function batchAllocateTokensTo(
+    tokens: TestToken[] | string[],
+    recipient: SignerWithAddress,
+    amount: BigNumber
+): Promise<void> {
     for (const token of tokens) {
         await allocateTokenTo(token, recipient, amount);
     }
 }
 
+// ================================================================================================
+// SETUP FUNCTIONS
+// ================================================================================================
+
+/**
+ * Sets up the complete test environment with contracts and tokens
+ */
 async function preSetupTestEnvironment() {
     const [deployer, user] = await ethers.getSigners();
 
+    // Deploy test tokens
     const numTokens = 3;
     const tokenFactory = new TestToken__factory(deployer);
-    const initializeTokens = [];
-    // Deploy multiple tokens
+    const initializeTokens: TestToken[] = [];
+
     for (let i = 0; i < numTokens; i++) {
         const tokenName = `Test Token ${i + 1}`;
         const tokenSymbol = `TT${i + 1}`;
         const contract = await tokenFactory.deploy(tokenName, tokenSymbol);
         await contract.deployed();
-
         initializeTokens.push(contract);
     }
 
+    // Sort token addresses for deterministic ordering
     const sortedTokenAddresses = initializeTokens
         .map((token) => token.address)
-        .sort((a, b) => {
-            return a.toLowerCase().localeCompare(b.toLowerCase());
-        });
+        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
     const newToken = await tokenFactory.deploy("Test Token 4", "TT4");
     await newToken.deployed();
@@ -217,9 +256,11 @@ async function preSetupTestEnvironment() {
     };
 }
 
+/**
+ * Sets up test environment with proportional liquidity initialization
+ */
 async function setupWithProportionalInit() {
-    type PreSetupReturnType = Awaited<ReturnType<typeof preSetupTestEnvironment>>;
-    const preSetup: PreSetupReturnType = await loadFixture(preSetupTestEnvironment);
+    const preSetup = await loadFixture(preSetupTestEnvironment);
     const { deployer, stablePoolContract, routerContract, vaultExtensionContract, sortedTokenAddresses } = preSetup;
 
     const initializeAmount = parseUnits("100", 18);
@@ -247,18 +288,15 @@ async function setupWithProportionalInit() {
     };
 }
 
+// ================================================================================================
+// TESTS
+// ================================================================================================
+
 describe("# Initialize Stable Pool", function () {
-    context.skip("* unbalanced init", async () => {
+    context.skip("* unbalanced init", () => {
         it("Should initialize the stable pool with unbalanced tokens", async () => {
-            const {
-                user,
-                stablePoolContract,
-                routerContract,
-                initializeTokens,
-                sortedTokenAddresses,
-                newToken,
-                vaultContract
-            } = await loadFixture(preSetupTestEnvironment);
+            const { user, stablePoolContract, routerContract, initializeTokens, sortedTokenAddresses, newToken } =
+                await loadFixture(preSetupTestEnvironment);
 
             const tokensAddresses = [...sortedTokenAddresses, newToken.address];
 
@@ -275,11 +313,13 @@ describe("# Initialize Stable Pool", function () {
             );
             const minBptAmountOut = parseUnits("5", 18);
 
-            // sortedTokenAddresses.forEach(async (tokenAddress, index) => {
-            _sortedTokenAddresses.forEach(async (tokenAddress, index) => {
-                await allocateTokenTo(tokenAddress, user, initializeAmounts[index]);
-                await approveToken(tokenAddress, user, routerContract.address, initializeAmounts[index]);
-            });
+            // Allocate and approve tokens for each address
+            for (let i = 0; i < _sortedTokenAddresses.length; i++) {
+                const tokenAddress = _sortedTokenAddresses[i];
+                const tokenAmount = initializeAmounts[i];
+                await allocateTokenTo(tokenAddress, user, tokenAmount);
+                await approveToken(tokenAddress, user, routerContract.address, tokenAmount);
+            }
             await batchApproveTokens(initializeTokens, user, routerContract.address, MaxUint256);
 
             // Initialize the stable pool with unbalanced tokens
@@ -297,26 +337,19 @@ describe("# Initialize Stable Pool", function () {
 });
 
 describe("# Add Liquidity", function () {
-    context("* proportional", async () => {
+    context("* proportional", () => {
         it("Should add liquidity to the stable pool", async () => {
-            const { user, stablePoolContract, routerContract, initializeTokens, sortedTokenAddresses, vaultContract } =
-                await loadFixture(setupWithProportionalInit);
+            const { user, stablePoolContract, routerContract, initializeTokens, vaultContract } = await loadFixture(
+                setupWithProportionalInit
+            );
 
             const minBptAmountOut = parseUnits("300", 18);
             const depositAmount = parseUnits("100", 18);
+
             // Allocate tokens to the user
             await batchAllocateTokensTo(initializeTokens, user, depositAmount);
             // Approve tokens for the router
             await batchApproveTokens(initializeTokens, user, routerContract.address, depositAmount);
-
-            // const amountsIn = await routerContract.connect(user).callStatic.queryAddLiquidityProportional(
-            //     stablePoolContract.address,
-            //     exactBptAmountOut,
-            //     user.address,
-            //     HashZero // no additional user data
-            // );
-            // const maxAmountsIn = amountsIn;
-            // console.table(maxAmountsIn);
 
             const maxAmountsIn = initializeTokens.map(() => depositAmount);
             // Create the add liquidity transaction: proportional
@@ -330,25 +363,19 @@ describe("# Add Liquidity", function () {
             );
 
             await addLiquidityProportionalTx.wait();
-
             await expect(addLiquidityProportionalTx).to.emit(vaultContract, "LiquidityAdded");
 
             // Remove the liquidity
-
-            // Create the remove liquidity transaction: proportional
-
             console.log("Router address:", routerContract.address);
             console.log("Stable Pool address:", stablePoolContract.address);
             console.log("Vault address:", vaultContract.address);
             console.log("User address:", user.address);
 
             const minAmountsOut = initializeTokens.map(() => parseUnits("10", 18));
-            const exactBptAmountIn = parseUnits("50", 18); // Exact BPT amount to remove
-            // await stablePoolContract.approve(
-            //     routerContract.address,
-            //     MaxUint256
-            // ); // Approve the vault to spend stable pool tokens
-            await approveToken(stablePoolContract.address, user, routerContract.address, MaxUint256); // Approve the vault to spend stable pool tokens
+            const exactBptAmountIn = parseUnits("50", 18);
+
+            // Approve the vault to spend stable pool tokens
+            await approveToken(stablePoolContract.address, user, routerContract.address, MaxUint256);
 
             const removeLiquidityProportionalTx = await routerContract.connect(user).removeLiquidityProportional(
                 stablePoolContract.address,
@@ -364,10 +391,11 @@ describe("# Add Liquidity", function () {
         });
     });
 
-    context.skip("* twice unbalanced", async () => {
+    context.skip("* twice unbalanced", () => {
         it("Should twice add liquidity to the pool", async () => {
-            const { user, stablePoolContract, routerContract, initializeTokens, sortedTokenAddresses, vaultContract } =
-                await loadFixture(setupWithProportionalInit);
+            const { user, stablePoolContract, routerContract, initializeTokens, vaultContract } = await loadFixture(
+                setupWithProportionalInit
+            );
 
             // ---- First add liquidity unbalanced ----
             const minBptAmountOut = parseUnits("100", 18);
@@ -414,10 +442,11 @@ describe("# Add Liquidity", function () {
         });
     });
 
-    context("* unbalanced and proportional", async () => {
+    context("* unbalanced and proportional", () => {
         it("Should add liquidity of various types to the pool", async () => {
-            const { user, stablePoolContract, routerContract, initializeTokens, sortedTokenAddresses, vaultContract } =
-                await loadFixture(setupWithProportionalInit);
+            const { user, stablePoolContract, routerContract, initializeTokens, vaultContract } = await loadFixture(
+                setupWithProportionalInit
+            );
 
             // ---- Add liquidity unbalanced ----
             const minBptAmountOut = parseUnits("100", 18);
@@ -461,17 +490,11 @@ describe("# Add Liquidity", function () {
         });
     });
 
-    context("* unbalanced", async () => {
+    context("* unbalanced", () => {
         it("Should add liquidity to the stable pool", async () => {
-            const {
-                user,
-                stablePoolContract,
-                routerContract,
-                initializeTokens,
-                sortedTokenAddresses,
-                newToken,
-                vaultContract
-            } = await loadFixture(setupWithProportionalInit);
+            const { user, stablePoolContract, routerContract, initializeTokens, vaultContract } = await loadFixture(
+                setupWithProportionalInit
+            );
 
             // const numberOTimes = 2; // Number of tokens to add liquidity for
             // for (let i = 0; i < numberOTimes; i++) {
@@ -502,10 +525,11 @@ describe("# Add Liquidity", function () {
         });
     });
 
-    context("* Add New Token", async () => {
+    context("* Add New Token", () => {
         it.only("Should add a new token to the vault", async () => {
-            const { deployer, user, vaultContract, stablePoolContract, routerContract, initializeTokens, newToken } =
-                await loadFixture(setupWithProportionalInit);
+            const { deployer, vaultContract, stablePoolContract, routerContract, newToken } = await loadFixture(
+                setupWithProportionalInit
+            );
 
             const tokenConfig = {
                 token: newToken.address,
@@ -542,57 +566,36 @@ describe("# Add Liquidity", function () {
             };
 
             const initialAmount = parseUnits("150", 18);
-            // Allocate tokens to the user
+
+            // Allocate tokens to the deployer
             await batchAllocateTokensTo([newToken], deployer, initialAmount);
             // Approve tokens for the router
             await batchApproveTokens([newToken], deployer, routerContract.address, initialAmount);
 
+            // Add new token to pool
             await expect(
                 await routerContract
                     .connect(deployer)
                     .addTokenToPool(stablePoolContract.address, tokenConfig, initialAmount)
             ).to.emit(vaultContract, "AddedNewTokenToPool");
-            // .withArgs(stablePoolContract.address, newToken.address, 3);
 
             const tokens = [...initializeTokens, newToken];
-            let minBptAmountOut = parseUnits("100", 18);
-            let depositAmount = parseUnits("100", 18);
-            let maxAmountsIn = tokens.map(() => depositAmount);
-            // ------------------ Add liquidity: proportional ------------------
+            const minBptAmountOut = parseUnits("50", 18);
+            const depositAmount = parseUnits("200", 18);
 
-            // // Allocate tokens to the user
-            // await batchAllocateTokensTo(tokens, user, depositAmount);
-            // // Approve tokens for the router
-            // await batchApproveTokens(tokens, user, routerContract.address, depositAmount);
-
-            // // Create the add liquidity transaction: proportional
-            // const addLiquidityProportionalTx = await routerContract.connect(user).addLiquidityProportional(
-            //     stablePoolContract.address,
-            //     maxAmountsIn,
-            //     exactBptAmountOut,
-            //     false, // weth is eth
-            //     HashZero // no additional user data
-            // );
-
-            // await addLiquidityProportionalTx.wait();
-
-            // await expect(addLiquidityProportionalTx).to.emit(vaultContract, "LiquidityAdded");
-
-            // ------------------ Add liquidity: unbalanced ------------------
-
+            // Test liquidity operations with new token
             const lpTokenUserBalanceBefore = await stablePoolContract.balanceOf(user.address);
             console.log("User LP Token Balance Before:", lpTokenUserBalanceBefore.toString());
 
-            minBptAmountOut = parseUnits("50", 18);
-            depositAmount = parseUnits("200", 18);
             // Allocate tokens to the user
             await batchAllocateTokensTo([newToken], user, depositAmount);
             // Approve tokens for the router
             await batchApproveTokens([newToken], user, routerContract.address, depositAmount);
 
-            maxAmountsIn = tokens.map((token) => {
+            const maxAmountsIn = tokens.map((token) => {
                 return token === newToken ? depositAmount : Zero;
             });
+
             // Create the add liquidity transaction: unbalanced
             const addLiquidityUnbalancedTx = await routerContract.connect(user).addLiquidityUnbalanced(
                 stablePoolContract.address,
@@ -603,7 +606,6 @@ describe("# Add Liquidity", function () {
             );
 
             await addLiquidityUnbalancedTx.wait();
-
             await expect(addLiquidityUnbalancedTx).to.emit(vaultContract, "LiquidityAdded");
 
             const lpTokenUserBalanceAfter = await stablePoolContract.balanceOf(user.address);
