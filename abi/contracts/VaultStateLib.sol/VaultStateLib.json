@@ -1,5 +1,0 @@
-[
-  "function BUFFER_PAUSED_OFFSET() view returns (uint256)",
-  "function QUERY_DISABLED_OFFSET() view returns (uint256)",
-  "function VAULT_PAUSED_OFFSET() view returns (uint256)"
-]

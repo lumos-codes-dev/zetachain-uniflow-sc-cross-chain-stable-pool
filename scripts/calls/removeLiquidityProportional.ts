@@ -42,9 +42,9 @@ async function main() {
     // const  zero = new Signer(AddressZero, ethers.provider);
 
     // Connect to the CompositeLiquidityRouter contract
-    const routerContract = Router__factory.connect(ROUTER_ADDRESS, provider) as Router;
+    const routerContract = Router__factory.connect(ROUTER_ADDRESS, provider);
     // Connect to the StablePool contract
-    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], caller) as StablePool;
+    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], caller);
     const poolDecimal = await poolContract.decimals();
     const poolSymbol = await poolContract.symbol();
     // Get the token addresses from the pool

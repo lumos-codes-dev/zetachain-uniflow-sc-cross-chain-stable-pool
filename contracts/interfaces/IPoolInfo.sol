@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.24;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import { TokenInfo } from "../common/VaultTypes.sol";
+import {TokenInfo} from "../common/VaultTypes.sol";
 
 /**
  * @notice Convenience interface for pools, to get easy access to information stored in the Vault.

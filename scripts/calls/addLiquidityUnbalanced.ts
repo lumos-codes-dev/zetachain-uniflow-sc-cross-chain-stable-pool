@@ -2,12 +2,12 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 import hre from "hardhat";
-const { ethers, network } = hre;
+const { ethers } = hre;
 
-const { parseEther, parseUnits, formatEther, formatUnits, solidityPack } = ethers.utils;
-const { Zero, AddressZero, HashZero } = ethers.constants;
+const { parseUnits, formatUnits } = ethers.utils;
+const { Zero, HashZero } = ethers.constants;
 
-import { Router, Router__factory, StablePool__factory, StablePool } from "../../typechain-types";
+import { Router__factory, StablePool__factory } from "../../typechain-types";
 import { ZRC20__factory, ZRC20 } from "../../test/helpers/types/contracts";
 
 import { MaxUint256 } from "@uniswap/permit2-sdk";
@@ -34,9 +34,9 @@ async function main() {
     const currentNetwork = hre.network.name.toString();
 
     // Connect to the CompositeLiquidityRouter contract
-    const routerContract = Router__factory.connect(ROUTER_ADDRESS, caller) as Router;
+    const routerContract = Router__factory.connect(ROUTER_ADDRESS, caller);
     // Connect to the StablePool contract
-    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], caller) as StablePool;
+    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], caller);
     const poolDecimal = await poolContract.decimals();
     const poolSymbol = await poolContract.symbol();
     // Get the token addresses from the pool

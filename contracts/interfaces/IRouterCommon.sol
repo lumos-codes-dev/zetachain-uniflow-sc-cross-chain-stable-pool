@@ -3,7 +3,7 @@
 pragma solidity ^0.8.24;
 
 import {IAllowanceTransfer} from "@uniswap/permit2/src/interfaces/IAllowanceTransfer.sol";
-// @todo delete or implement
+// @todo revert support of permit2
 // import { IPermit2 } from "@uniswap/permit2/src/interfaces/IPermit2.sol";
 import {AddLiquidityKind, RemoveLiquidityKind} from "../common/VaultTypes.sol";
 
@@ -59,7 +59,7 @@ interface IRouterCommon {
     function getWeth() external view returns (IWETH);
 
     /// @notice Returns Permit2 contract address.
-    // @todo delete
+    // @todo revert support of permit2
     // function getPermit2() external view returns (IPermit2);
     function getPermit2() external view returns (address);
 

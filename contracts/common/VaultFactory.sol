@@ -13,8 +13,8 @@ import {IVault} from "../interfaces/IVault.sol";
 import {ReentrancyGuardTransient} from "./ReentrancyGuardTransient.sol";
 import {CREATE3} from "../libs/CREATE3.sol";
 
-import {VaultExtension} from "../_VaultExtension.sol";
-import {VaultAdmin} from "../_VaultAdmin.sol";
+import {VaultExtension} from "../VaultExtension.sol";
+import {VaultAdmin} from "../VaultAdmin.sol";
 
 /// @notice One-off factory to deploy the Vault at a specific address.
 contract VaultFactory is ReentrancyGuardTransient, Ownable2Step {

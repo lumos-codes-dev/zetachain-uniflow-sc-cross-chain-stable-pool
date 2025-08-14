@@ -19,7 +19,7 @@ async function deploy() {
     const args = {
         vault: VAULT_TEST_ADDRESS,
         weth: AddressZero,
-        routerVersion: '{"name":"Router""version":2"deployment":"20250723-v3-router-v2"}'
+        routerVersion: "{\"name\":\"Router\"\"version\":2\"deployment\":\"20250723-v3-router-v2\"}"
     };
 
     console.log("\n --- Deployed data --- \n");

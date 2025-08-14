@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import * as dotenv from "dotenv";
 dotenv.config();
 
 import hre from "hardhat";
 const { ethers } = hre;
 
-import { Vault, Vault__factory } from "../../typechain-types";
-import { AddressZero, Zero } from "../../test/helpers";
+import { Vault__factory } from "../../typechain-types";
+import { AddressZero, parseEther } from "../../test/helpers";
 
 const NEW_TOKEN_ADDRESS = "0x30e7d25774507630733d1E277E7B664b1Dee757e";
 
@@ -16,7 +19,7 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     const networkName = hre.network.name.toString();
 
-    const vaultContract = Vault__factory.connect(VAULT_TEST_ADDRESS, deployer) as Vault;
+    const vaultContract = Vault__factory.connect(VAULT_TEST_ADDRESS, deployer);
 
     console.log("\n --- Add New Token --- \n");
     console.log("* ", deployer.address, "- Caller address");
@@ -30,14 +33,14 @@ async function main() {
     }
 
     const tokenInfo = {
+        token: NEW_TOKEN_ADDRESS,
+        chainId: 1,
         tokenType: TokenType.STANDARD,
         rateProvider: AddressZero,
         paysYieldFees: false
     };
 
-    const addNewTokenTx = await vaultContract.addNewToken(STABLE_TEST_POOL_ADDRESS, NEW_TOKEN_ADDRESS, tokenInfo, {
-        gasLimit: 5000000
-    });
+    const addNewTokenTx = await vaultContract.addTokenToPool(STABLE_TEST_POOL_ADDRESS, tokenInfo, parseEther("1000"));
 
     await addNewTokenTx.wait();
 

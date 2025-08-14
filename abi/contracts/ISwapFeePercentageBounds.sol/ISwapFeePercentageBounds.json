@@ -1,4 +1,0 @@
-[
-  "function getMaximumSwapFeePercentage() view returns (uint256)",
-  "function getMinimumSwapFeePercentage() view returns (uint256)"
-]

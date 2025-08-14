@@ -2,8 +2,8 @@
 
 pragma solidity ^0.8.24;
 
-import { IVault } from "../interfaces/IVault.sol";
-import { Authentication } from "./Authentication.sol";
+import {IVault} from "../interfaces/IVault.sol";
+import {Authentication} from "./Authentication.sol";
 
 /// @dev Base contract for performing access control on external functions within pools.
 abstract contract CommonAuthentication is Authentication {

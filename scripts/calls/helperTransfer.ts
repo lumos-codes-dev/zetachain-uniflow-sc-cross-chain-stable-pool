@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import * as dotenv from "dotenv";
 dotenv.config();
 import nodeConfig from "config";
@@ -5,12 +8,10 @@ import nodeConfig from "config";
 import hre from "hardhat";
 const { ethers } = hre;
 
-const { parseEther, parseUnits, formatEther, formatUnits, solidityPack } = ethers.utils;
+const { parseEther, parseUnits, formatEther, formatUnits } = ethers.utils;
 const { Zero, AddressZero, HashZero } = ethers.constants;
 
-import { HelperContract__factory } from "../../typechain-types";
-import { GatewayEVM, GatewayEVM__factory, ZRC20__factory } from "../../test/helpers/types/contracts";
-import { MaxUint256 } from "../../test/helpers";
+import { GatewayEVM__factory, ZRC20__factory } from "../../test/helpers/types/contracts";
 
 /// ------- Helper Transfer Script -------
 // NOTE: Run this script with the command:

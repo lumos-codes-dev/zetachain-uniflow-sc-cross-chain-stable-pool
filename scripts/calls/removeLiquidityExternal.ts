@@ -4,7 +4,7 @@ dotenv.config();
 import hre from "hardhat";
 const { ethers } = hre;
 
-import { VoidSigner } from 'ethers';
+import { VoidSigner } from "ethers";
 // import { Signer } from 'ethers';
 
 const { parseEther, parseUnits, formatEther, formatUnits, solidityPack } = ethers.utils;
@@ -38,13 +38,13 @@ async function main() {
     const provider = ethers.provider;
 
     // const  zero = new VoidSigner('0x0000000000000000000000000000000000000000', ethers.provider);
-    const  zero = new VoidSigner(AddressZero, ethers.provider);
+    const zero = new VoidSigner(AddressZero, ethers.provider);
     // const  zero = new Signer(AddressZero, ethers.provider);
 
     // Connect to the CompositeLiquidityRouter contract
-    const routerContract = Router__factory.connect(ROUTER_ADDRESS, provider) as Router;
+    const routerContract = Router__factory.connect(ROUTER_ADDRESS, provider);
     // Connect to the StablePool contract
-    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], caller) as StablePool;
+    const poolContract = StablePool__factory.connect(POOL_ADDRESSES[CURRENT_POOL], caller);
     const poolDecimal = await poolContract.decimals();
     const poolSymbol = await poolContract.symbol();
     // Get the token addresses from the pool
@@ -60,12 +60,14 @@ async function main() {
     console.log("* ", currentNetwork, "- Network name");
     console.log("\n --- ------- ---- --- ");
 
-    const queryTx = await routerContract.connect(zero).callStatic.queryRemoveLiquidityProportional(
-        POOL_ADDRESSES[CURRENT_POOL],
-        parseUnits(EXACT_BPT_AMOUNT_IN, poolDecimal),
-        zero.address,
-        HashZero
-    );
+    const queryTx = await routerContract
+        .connect(zero)
+        .callStatic.queryRemoveLiquidityProportional(
+            POOL_ADDRESSES[CURRENT_POOL],
+            parseUnits(EXACT_BPT_AMOUNT_IN, poolDecimal),
+            zero.address,
+            HashZero
+        );
 
     console.log(`\nQuery remove liquidity proportional result: ${queryTx}`);
 

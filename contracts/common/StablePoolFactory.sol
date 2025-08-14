@@ -11,7 +11,7 @@ import {BasePoolFactory} from "./BasePoolFactory.sol";
 import {StableMath} from "../libs/StableMath.sol";
 import {Version} from "./Version.sol";
 
-import {StablePool} from "../_StablePool.sol";
+import {StablePool} from "../StablePool.sol";
 
 /**
  * @notice General Stable Pool factory.
