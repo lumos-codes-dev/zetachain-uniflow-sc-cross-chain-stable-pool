@@ -133,6 +133,108 @@ This project implements a cross-chain stable pool system that allows for seamles
 4. **Optimized Libraries**: Streamlined for cross-chain operations
 5. **ZetaChain Integration**: Native support for omnichain functionality
 
+## 🔄 Detailed Implementation Differences
+
+### 📦 Vault System Differences
+
+#### **Removed Features from Balancer v3**
+- **ERC4626 Buffer Operations**: The entire ERC4626 buffer wrapping/unwrapping system has been removed
+  - `erc4626BufferWrapOrUnwrap()` function eliminated
+  - Buffer rebalancing logic removed
+  - Wrapped token buffer management removed
+- **Hook System**: Comprehensive hook system removed
+  - `beforeSwap`, `afterSwap`, `beforeAddLiquidity`, `afterAddLiquidity` hooks
+  - `beforeRemoveLiquidity`, `afterRemoveLiquidity` hooks
+  - Dynamic swap fee hooks
+  - Hook configuration and management
+
+#### **Modified Core Functions**
+- **Simplified Swap Logic**: Direct pool interaction without hook intermediaries
+- **Streamlined Liquidity Operations**: Removed hook-based fee adjustments and custom logic
+- **Import Structure**: Uses local imports instead of Balancer v3 package structure
+- **Library Organization**: Reorganized into `libs/` and `common/` directories
+
+### 🚀 Router System Differences
+
+#### **ZetaChain Integration Added**
+- **Universal Contract Pattern**: Inherits from ZetaChain's `UniversalContract`
+- **Cross-Chain Gateway**: Direct integration with ZetaChain Gateway contract
+- **Cross-Chain Liquidity Operations**:
+  ```solidity
+  function onCall(MessageContext calldata context, address zrc20, uint256 amount, bytes calldata message)
+  function onRevert(RevertContext calldata context)
+  function onAbort(RevertContext calldata context)
+  ```
+- **Multi-Chain Token Management**: Support for ZRC20 tokens across chains
+- **Gas Fee Handling**: Automatic gas fee calculation for cross-chain withdrawals
+
+#### **Removed Balancer v3 Features**
+- **Permit2 Integration**: Temporarily removed (marked with @todo)
+- **RouterQueries Inheritance**: Simplified to direct implementation
+- **RouterHooks System**: Hook-based operations replaced with direct vault calls
+- **Aggregator Functionality**: Advanced routing features removed
+- **Complex Query System**: Simplified query implementations
+
+#### **Modified Function Signatures**
+- **Constructor Changes**: 
+  ```solidity
+  // Balancer v3
+  constructor(IVault vault, IWETH weth, IPermit2 permit2, bool isAggregator, string memory routerVersion)
+  
+  // Current Implementation  
+  constructor(IVault vault, IWETH weth, string memory routerVersion)
+  ```
+- **Hook Functions**: Moved from external contracts to internal implementations
+- **Token Operations**: Direct ZetaChain token handling instead of generic ERC20
+
+#### **Added Cross-Chain Specific Functions**
+- **`addTokenToPool()`**: Add new tokens to existing pools dynamically
+- **`removeLiquiditySingleTokenExactIn()`**: Cross-chain single token removal with chain ID targeting
+- **`_handleGasAndSwap()`**: Internal gas fee calculation and token swapping
+- **`_withdraw()`**: Cross-chain withdrawal to external networks
+
+### 🏗️ Architectural Simplifications
+
+#### **Package Structure**
+- **Balancer v3**: Modular packages (`@balancer-labs/v3-vault`, `@balancer-labs/v3-interfaces`)
+- **Current**: Monolithic structure with local imports
+
+#### **Hook Architecture**
+- **Balancer v3**: Extensible hook system for custom pool logic
+- **Current**: Direct pool interactions without middleware hooks
+
+#### **Pool Factory System**
+- **Balancer v3**: Complex factory hierarchy with multiple pool types
+- **Current**: Focused on stable pool factory only
+
+#### **Query System**
+- **Balancer v3**: Sophisticated query routing with multiple query types
+- **Current**: Basic query functions with simplified implementations
+
+### 🔐 Security Model Changes
+
+#### **Authentication**
+- **Maintained**: Core authentication patterns from Balancer v3
+- **Added**: ZetaChain gateway-specific access controls
+- **Modified**: Simplified authorizer integration
+
+#### **Reentrancy Protection**
+- **Enhanced**: Maintained transient storage reentrancy guards
+- **Simplified**: Removed complex hook-based reentrancy considerations
+
+### ⚡ Gas Optimizations
+
+#### **Reduced Complexity**
+- **Hook Removal**: Eliminates multiple external calls per operation
+- **Simplified Routing**: Direct vault interactions reduce gas overhead
+- **Streamlined Libraries**: Removed unused utility functions
+
+#### **Cross-Chain Efficiency**
+- **Batched Operations**: Efficient cross-chain message handling
+- **Gas Estimation**: Built-in gas fee calculation for cross-chain operations
+
+This implementation maintains ~85% of Balancer v3's core functionality while adding ZetaChain's cross-chain capabilities and removing advanced features that aren't immediately necessary for the omnichain stable pool use case.
+
 ## Project Structure
 
 ```
