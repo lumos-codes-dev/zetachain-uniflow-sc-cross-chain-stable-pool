@@ -93,9 +93,34 @@
         "old": {},
         "new": {
             "KBKRW": {
-                "address": "0x6B513B40eBc0B4D7B197730476ed3324346F2822",
-                "deployedBlock": 194226805,
+                "address": "0x2254a33Ee9F600ed6574FAA9Ad8ED1Dc4a44820e",
+                "deployedBlock": 194228483,
                 "chainId": 1001
+            },
+            "TSKRW": {
+                "address": "0x90fDDe887468D282090D12208d6e171e1632008c",
+                "deployedBlock": 194229061,
+                "chainId": 1001
+            }
+        }
+    },
+    "avalanche_testnet": {
+        "old": {},
+        "new": {
+            "HanaKRW": {
+                "address": "0x6B513B40eBc0B4D7B197730476ed3324346F2822",
+                "deployedBlock": 45088262,
+                "chainId": 43113
+            }
+        }
+    },
+    "arb_testnet": {
+        "old": {},
+        "new": {
+            "UPKRW": {
+                "address": "0x6B513B40eBc0B4D7B197730476ed3324346F2822",
+                "deployedBlock": 186542023,
+                "chainId": 421614
             }
         }
     }
