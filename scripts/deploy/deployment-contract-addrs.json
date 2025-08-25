@@ -63,8 +63,8 @@
                 "chainId": 7001
             },
             "UniversalStableSwap": {
-                "address": "0x6B513B40eBc0B4D7B197730476ed3324346F2822",
-                "deployedBlock": 12313080,
+                "address": "0x5C4a9d369c6914847C80acd5b1cd152B63a83668",
+                "deployedBlock": 12319505,
                 "chainId": 7001
             }
         }
