@@ -14,6 +14,11 @@ contract UniversalStableSwap is UniversalContract, Ownable {
     address public immutable uniswapRouter;
     /// Stores if token is whitelisted.
     mapping(address => bool) isTokenWhitelisted;
+    /// Structs
+    struct CallParams {
+        bytes receiver;
+        address targetToken;
+    }
 
     /// Errors
     error InvalidAddress();
@@ -51,8 +56,9 @@ contract UniversalStableSwap is UniversalContract, Ownable {
         uint256 amount,
         bytes calldata message 
     ) external override onlyGateway {
-        // Decode message to get the target token address.
-        address targetToken = abi.decode(message, (address));
+        // Decode message to get the target token and receiver addresses.
+        CallParams memory callParams = _decode(message);
+        address targetToken = callParams.targetToken;
         // Check if tokens are whitelisted.
         if (!isTokenWhitelisted[zrc20] || !isTokenWhitelisted[targetToken]) revert InvalidAddress();
         // Swap stable in order to pay for gas fee.
@@ -67,6 +73,12 @@ contract UniversalStableSwap is UniversalContract, Ownable {
         // Create default revert options struct.
         RevertOptions memory revertOptions;
         // Initiate cross chain withdraw call.
-        gateway.withdraw(context.sender, outputAmount, targetToken, revertOptions);
+        gateway.withdraw(callParams.receiver, outputAmount, targetToken, revertOptions);
+    }
+
+    function _decode(
+        bytes calldata message
+    ) private pure returns (CallParams memory resp) {
+        (resp.receiver, resp.targetToken) = abi.decode(message, (bytes, address));
     }
 }
