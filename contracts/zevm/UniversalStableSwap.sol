@@ -17,9 +17,9 @@ contract UniversalStableSwap is UniversalContract, Ownable {
     /// Represents the instance of the Router contract deployed on ZetaChain.
     IRouter public immutable router;
     /// Represents the instance of the StablePoolKRW contract deployed on ZetaChain.
-    address public stablePool;
+    address public immutable stablePool;
     /// Stores if token is whitelisted.
-    mapping(address => bool) isTokenWhitelisted;
+    mapping(address => bool) public isTokenWhitelisted;
 
     /// Structs
     struct CallParams {
@@ -102,22 +102,20 @@ contract UniversalStableSwap is UniversalContract, Ownable {
         address tokenOut,
         uint256 amountIn
     ) internal returns (uint256 amountOut) {
-        // First approve the router to spend the input token.
+        // Approve the router to spend the input token.
         if (!IERC20(tokenIn).approve(address(router), amountIn)) revert ApproveFailed();
         
-        // Use the router's swapSingleTokenExactIn function to swap via stable pool.
-        // Set a reasonable deadline (1 hour from now).
         uint256 deadline = block.timestamp + 1 hours;
-        
+        // Use the router's swapSingleTokenExactIn function to swap via stable pool.
         amountOut = router.swapSingleTokenExactIn(
             stablePool,
             IERC20(tokenIn),
             IERC20(tokenOut),
             amountIn,
-            0, // minAmountOut - set to 0 for now, could be made configurable.
+            0, 
             deadline,
-            false, // wethIsEth - set to false for ZetaChain.
-            "" // userData - empty for basic swap.
+            false,
+            "" 
         );
     }
 
