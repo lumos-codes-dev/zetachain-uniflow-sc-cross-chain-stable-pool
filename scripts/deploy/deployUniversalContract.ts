@@ -23,7 +23,9 @@ async function deploy() {
 
     const gateway = '0x6c533f7fe93fae114d0954697069df33c9b74fd7';
     const uniswapRouter = '0x2ca7d64A7EFE2D62A725E2B35Cf7230D6677FfEe';
-    const contract = await Contract.connect(deployer).deploy(gateway, uniswapRouter);
+    const router = '0xB4a9584e508E1dB7ebb8114573D39A69189CE1Ca';
+    const stablePool = '0xA017203F31E817911D63820Ea81b1061AcE42FD5';
+    const contract = await Contract.connect(deployer).deploy(gateway, uniswapRouter, router, stablePool);
     const deployTransaction = (await contract.deployed()).deployTransaction.wait();
 
     console.log(`Contract: \`${CONTRACT_NAME}\` is deployed to \`${contract.address}\`|\`${hre.network.name}\`.`);
@@ -39,7 +41,7 @@ async function deploy() {
     );
 
     console.log(`\nDeployment the ${CONTRACT_NAME} is completed.`);
-    await verify(contract.address, [gateway, uniswapRouter]);
+    await verify(contract.address, [gateway, uniswapRouter, router, stablePool]);
 
     console.log("\nDone.");
 }

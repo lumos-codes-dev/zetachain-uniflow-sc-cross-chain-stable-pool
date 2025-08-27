@@ -5,15 +5,22 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@zetachain/protocol-contracts/contracts/zevm/interfaces/UniversalContract.sol";
 import "@zetachain/protocol-contracts/contracts/zevm/interfaces/IGatewayZEVM.sol";
 import "@zetachain/protocol-contracts/contracts/zevm/interfaces/IZRC20.sol";
+import {IRouter} from "../interfaces/IRouter.sol";
 import {SwapHelperLib} from "@zetachain/toolkit/contracts/SwapHelperLib.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract UniversalStableSwap is UniversalContract, Ownable {
     /// Represents the instance of the GatewayZEVM contract deployed on ZetaChain.
     IGatewayZEVM public immutable gateway;
     /// Represents the instance of the UniswapRouter contract deployed on ZetaChain.
     address public immutable uniswapRouter;
+    /// Represents the instance of the Router contract deployed on ZetaChain.
+    IRouter public immutable router;
+    /// Represents the instance of the StablePoolKRW contract deployed on ZetaChain.
+    address public stablePool;
     /// Stores if token is whitelisted.
     mapping(address => bool) isTokenWhitelisted;
+
     /// Structs
     struct CallParams {
         bytes receiver;
@@ -33,12 +40,16 @@ contract UniversalStableSwap is UniversalContract, Ownable {
 
     constructor(
         address payable _gateway,
-        address _uniswapRouter
+        address _uniswapRouter,
+        address _router,
+        address _stablePool
     ) Ownable(msg.sender) {
-        if (_gateway == address(0) || _uniswapRouter == address(0)) revert InvalidAddress();
+        if (_gateway == address(0) || _uniswapRouter == address(0) || _router == address(0) || _stablePool == address(0)) revert InvalidAddress();
         // Set the immutables.
         gateway = IGatewayZEVM(_gateway);
         uniswapRouter = _uniswapRouter;
+        router = IRouter(_router);
+        stablePool = _stablePool;
     }
 
     /// @notice Should whitelist the ZRC20 token address.
@@ -59,21 +70,55 @@ contract UniversalStableSwap is UniversalContract, Ownable {
         // Decode message to get the target token and receiver addresses.
         CallParams memory callParams = _decode(message);
         address targetToken = callParams.targetToken;
+        
         // Check if tokens are whitelisted.
         if (!isTokenWhitelisted[zrc20] || !isTokenWhitelisted[targetToken]) revert InvalidAddress();
         // Swap stable in order to pay for gas fee.
         (address gasZRC20, uint256 gasFee) = IZRC20(targetToken).withdrawGasFee();
         uint256 inputForGas = SwapHelperLib.swapTokensForExactTokens(uniswapRouter, zrc20, gasFee, gasZRC20, amount);
         uint256 swapAmount = amount - inputForGas;
-        // Swap input to the desired token.
-        uint256 outputAmount = SwapHelperLib.swapExactTokensForTokens(uniswapRouter, zrc20, swapAmount, targetToken, 0);
+        
+        // Swap input to the desired token using stable pool via router
+        uint256 outputAmount = _swapViaStablePool(zrc20, targetToken, swapAmount);
+        
         // Create token approvals.
         if (!IZRC20(gasZRC20).approve(address(gateway), gasFee)) revert ApproveFailed();
         if (!IZRC20(targetToken).approve(address(gateway), outputAmount)) revert ApproveFailed();
+        
         // Create default revert options struct.
         RevertOptions memory revertOptions;
+        
         // Initiate cross chain withdraw call.
         gateway.withdraw(callParams.receiver, outputAmount, targetToken, revertOptions);
+    }
+
+    /// @notice Swap tokens using the stable pool via router.
+    /// @param tokenIn The input token address.
+    /// @param tokenOut The output token address.
+    /// @param amountIn The amount of input tokens.
+    /// @return amountOut The amount of output tokens received.
+    function _swapViaStablePool(
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn
+    ) internal returns (uint256 amountOut) {
+        // First approve the router to spend the input token.
+        if (!IERC20(tokenIn).approve(address(router), amountIn)) revert ApproveFailed();
+        
+        // Use the router's swapSingleTokenExactIn function to swap via stable pool.
+        // Set a reasonable deadline (1 hour from now).
+        uint256 deadline = block.timestamp + 1 hours;
+        
+        amountOut = router.swapSingleTokenExactIn(
+            stablePool,
+            IERC20(tokenIn),
+            IERC20(tokenOut),
+            amountIn,
+            0, // minAmountOut - set to 0 for now, could be made configurable.
+            deadline,
+            false, // wethIsEth - set to false for ZetaChain.
+            "" // userData - empty for basic swap.
+        );
     }
 
     function _decode(
