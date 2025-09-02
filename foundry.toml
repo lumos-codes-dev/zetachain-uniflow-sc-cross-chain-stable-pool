@@ -1,7 +1,7 @@
 [profile.default]
 src = "contracts"
 out = "out"
-libs = ["lib", "node_modules"]
+libs = ["lib", "node_modules", "dependencies"]
 test = "test"
 script = "script"
 broadcast = "broadcast"
@@ -16,3 +16,6 @@ via_ir = true
 
 # EVM settings
 evm_version = "london"
+
+[dependencies]
+forge-std = "1.10.0"

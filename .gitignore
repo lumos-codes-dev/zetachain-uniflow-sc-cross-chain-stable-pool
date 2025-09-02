@@ -60,3 +60,7 @@ test/helpers/types/
 out/
 cache_forge/
 broadcast/
+
+
+# Soldeer
+/dependencies
